@@ -1,0 +1,53 @@
+package event
+
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
+// OrganizationCreated is emitted when a new organization is created.
+type OrganizationCreated struct {
+	OrganizationID uuid.UUID `json:"organization_id"`
+	Name           string    `json:"name"`
+	CreatedBy      uuid.UUID `json:"created_by"`
+	Timestamp      time.Time `json:"timestamp"`
+}
+
+// OrganizationUpdated is emitted when an organization is updated.
+type OrganizationUpdated struct {
+	OrganizationID uuid.UUID `json:"organization_id"`
+	UpdatedBy      uuid.UUID `json:"updated_by"`
+	Timestamp      time.Time `json:"timestamp"`
+}
+
+// OrganizationDeleted is emitted when an organization is deleted.
+type OrganizationDeleted struct {
+	OrganizationID uuid.UUID `json:"organization_id"`
+	DeletedBy      uuid.UUID `json:"deleted_by"`
+	Timestamp      time.Time `json:"timestamp"`
+}
+
+// AppCreated is emitted when a new app is created.
+type AppCreated struct {
+	AppID          uuid.UUID `json:"app_id"`
+	OrganizationID uuid.UUID `json:"organization_id"`
+	Name           string    `json:"name"`
+	Timestamp      time.Time `json:"timestamp"`
+}
+
+// AppUpdated is emitted when an app is updated.
+type AppUpdated struct {
+	AppID          uuid.UUID `json:"app_id"`
+	OrganizationID uuid.UUID `json:"organization_id"`
+	Timestamp      time.Time `json:"timestamp"`
+}
+
+// WorkspaceCreated is emitted when a new workspace is created.
+type WorkspaceCreated struct {
+	WorkspaceID    uuid.UUID `json:"workspace_id"`
+	OrganizationID uuid.UUID `json:"organization_id"`
+	Name           string    `json:"name"`
+	CreatedBy      uuid.UUID `json:"created_by"`
+	Timestamp      time.Time `json:"timestamp"`
+}
