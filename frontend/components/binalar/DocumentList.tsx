@@ -6,9 +6,11 @@ import { type BuildingDoc } from "@/lib/buildings";
 export default function DocumentList({
   documents,
   onUpload,
+  onApprove,
 }: {
   documents: BuildingDoc[];
   onUpload: (docName: string) => void;
+  onApprove?: (docName: string) => void;
 }) {
   return (
     <ul>
@@ -40,16 +42,27 @@ export default function DocumentList({
               </div>
             </div>
 
-            <div className="shrink-0">
+            <div className="flex shrink-0 items-center gap-2">
               {doc.status === "Onaylandı" && (
                 <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11.5px] font-medium text-emerald-600">
                   Onaylandı
                 </span>
               )}
               {doc.status === "Onay Bekliyor" && (
-                <span className="rounded-full bg-amber-50 px-3 py-1 text-[11.5px] font-medium text-amber-600">
-                  Onay Bekliyor
-                </span>
+                <>
+                  <span className="rounded-full bg-amber-50 px-3 py-1 text-[11.5px] font-medium text-amber-600">
+                    Onay Bekliyor
+                  </span>
+                  {onApprove && (
+                    <button
+                      type="button"
+                      onClick={() => onApprove(doc.name)}
+                      className="rounded-lg bg-emerald-50 px-3 py-1 text-[12.5px] font-semibold text-emerald-600 transition-colors hover:bg-emerald-100"
+                    >
+                      Onayla
+                    </button>
+                  )}
+                </>
               )}
               {doc.status === "Yüklenmedi" && (
                 <button

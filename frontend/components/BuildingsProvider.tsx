@@ -12,6 +12,8 @@ import {
   type NewBuildingInput,
   createBuilding,
   seedBuildings,
+  computeProgress,
+  nextStatus,
 } from "@/lib/buildings";
 
 const STORAGE_KEY = "parseltakip.buildings.v1";
@@ -22,6 +24,9 @@ interface BuildingsContextValue {
   addBuilding: (input: NewBuildingInput) => Building;
   assignContractor: (id: string, name: string) => void;
   markDocumentUploaded: (id: string, docName: string) => void;
+  approveDocument: (id: string, docName: string) => void;
+  advanceStatus: (id: string) => void;
+  resetBuildings: () => void;
 }
 
 const BuildingsContext = createContext<BuildingsContextValue | null>(null);
@@ -65,24 +70,49 @@ export function BuildingsProvider({ children }: { children: React.ReactNode }) {
 
   const markDocumentUploaded = useCallback((id: string, docName: string) => {
     setBuildings((prev) =>
-      prev.map((b) =>
-        b.id === id
-          ? {
-              ...b,
-              documents: b.documents.map((d) =>
-                d.name === docName
-                  ? {
-                      ...d,
-                      status: "Onay Bekliyor",
-                      uploadedBy: "Ahmet Yılmaz",
-                      date: new Date().toISOString().slice(0, 10),
-                    }
-                  : d,
-              ),
-            }
-          : b,
-      ),
+      prev.map((b) => {
+        if (b.id !== id) return b;
+        const documents = b.documents.map((d) =>
+          d.name === docName
+            ? {
+                ...d,
+                status: "Onay Bekliyor" as const,
+                uploadedBy: "Ahmet Yılmaz",
+                date: new Date().toISOString().slice(0, 10),
+              }
+            : d,
+        );
+        return { ...b, documents, progress: computeProgress(b.status, documents) };
+      }),
     );
+  }, []);
+
+  const approveDocument = useCallback((id: string, docName: string) => {
+    setBuildings((prev) =>
+      prev.map((b) => {
+        if (b.id !== id) return b;
+        const documents = b.documents.map((d) =>
+          d.name === docName
+            ? { ...d, status: "Onaylandı" as const }
+            : d,
+        );
+        return { ...b, documents, progress: computeProgress(b.status, documents) };
+      }),
+    );
+  }, []);
+
+  const advanceStatus = useCallback((id: string) => {
+    setBuildings((prev) =>
+      prev.map((b) => {
+        if (b.id !== id) return b;
+        const status = nextStatus(b.status);
+        return { ...b, status, progress: computeProgress(status, b.documents) };
+      }),
+    );
+  }, []);
+
+  const resetBuildings = useCallback(() => {
+    setBuildings(seedBuildings);
   }, []);
 
   return (
@@ -93,6 +123,9 @@ export function BuildingsProvider({ children }: { children: React.ReactNode }) {
         addBuilding,
         assignContractor,
         markDocumentUploaded,
+        approveDocument,
+        advanceStatus,
+        resetBuildings,
       }}
     >
       {children}

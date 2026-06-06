@@ -21,6 +21,7 @@ import {
   completedProjectCount,
 } from "@/lib/contractors";
 import BuildingCard from "@/components/binalar/BuildingCard";
+import ContractorLogo from "@/components/muteahhitler/ContractorLogo";
 
 export default function ContractorDetailPage({
   params,
@@ -84,9 +85,7 @@ export default function ContractorDetailPage({
               <ArrowLeft className="h-4 w-4" />
             </Link>
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                <Users className="h-6 w-6" />
-              </div>
+              <ContractorLogo name={contractor.name} className="h-12 w-12 text-[16px]" />
               <div>
                 <h1 className="text-[22px] font-bold tracking-tight text-ink-900">
                   {contractor.name}

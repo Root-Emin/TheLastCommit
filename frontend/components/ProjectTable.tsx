@@ -1,13 +1,8 @@
-import { ChevronRight, Building } from "lucide-react";
-import { projects, type StageLabel, type DocStatus } from "@/lib/data";
+"use client";
 
-const stageStyles: Record<StageLabel, string> = {
-  İnceleme: "bg-brand-50 text-brand-700",
-  "Belge Toplama": "bg-emerald-50 text-emerald-700",
-  Onay: "bg-violet-50 text-violet-700",
-  Yıkım: "bg-orange-50 text-orange-700",
-  "Yeniden Yapım": "bg-rose-50 text-rose-700",
-};
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+import { projects, stageStyles, type DocStatus } from "@/lib/data";
 
 function DocBadge({ status }: { status: DocStatus }) {
   const ok = status === "Tamam";
@@ -16,23 +11,29 @@ function DocBadge({ status }: { status: DocStatus }) {
       <span
         className={`h-2 w-2 rounded-full ${ok ? "bg-emerald-500" : "bg-orange-400"}`}
       />
-      <span className={ok ? "text-ink-700" : "text-ink-700"}>{status}</span>
+      <span className="text-ink-700">{status}</span>
     </span>
   );
 }
 
-export default function ProjectTable() {
+export default function ProjectTable({
+  selectedId,
+  onSelect,
+}: {
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+}) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white shadow-card">
       <div className="flex items-center justify-between px-5 py-4">
         <h2 className="text-[15px] font-semibold text-ink-900">Proje Takibi</h2>
-        <a
-          href="#"
+        <Link
+          href="/binalar"
           className="flex items-center gap-1 text-[12.5px] font-medium text-brand-600 hover:text-brand-700"
         >
           Tüm Projeleri Gör
           <ChevronRight className="h-3.5 w-3.5" />
-        </a>
+        </Link>
       </div>
 
       <div className="overflow-x-auto">
@@ -48,56 +49,68 @@ export default function ProjectTable() {
             </tr>
           </thead>
           <tbody className="text-[13px]">
-            {projects.map((p) => (
-              <tr
-                key={p.name}
-                className={[
-                  "border-b border-slate-50 transition-colors last:border-0",
-                  p.selected
-                    ? "bg-brand-50/50"
-                    : "hover:bg-slate-50/70",
-                ].join(" ")}
-              >
-                <td className="px-5 py-3.5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-ink-400">
-                      <Building className="h-[18px] w-[18px]" />
-                    </div>
-                    <div className="leading-tight">
-                      <p className="font-semibold text-ink-900">{p.name}</p>
-                      <p className="text-[11.5px] text-ink-400">{p.district}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-3 py-3.5 text-ink-700">{p.contractor}</td>
-                <td className="px-3 py-3.5">
-                  <span
-                    className={`inline-flex rounded-full px-2.5 py-1 text-[11.5px] font-medium ${stageStyles[p.stage]}`}
-                  >
-                    {p.stage}
-                  </span>
-                </td>
-                <td className="px-3 py-3.5">
-                  <div className="flex items-center gap-2">
-                    <div className="h-1.5 w-24 overflow-hidden rounded-full bg-slate-100">
-                      <div
-                        className={`h-full rounded-full ${p.progressColor}`}
-                        style={{ width: `${p.progress}%` }}
+            {projects.map((p) => {
+              const isSelected = p.id === selectedId;
+              return (
+                <tr
+                  key={p.id}
+                  onClick={() => onSelect(p.id)}
+                  className={[
+                    "cursor-pointer border-b border-slate-50 transition-colors last:border-0",
+                    isSelected
+                      ? "bg-brand-50/60 ring-1 ring-inset ring-brand-100"
+                      : "hover:bg-slate-50/70",
+                  ].join(" ")}
+                >
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={p.image}
+                        alt={p.name}
+                        className={[
+                          "h-9 w-9 shrink-0 rounded-lg object-cover ring-1 transition-shadow",
+                          isSelected ? "ring-brand-300" : "ring-slate-200",
+                        ].join(" ")}
                       />
+                      <div className="leading-tight">
+                        <p className="font-semibold text-ink-900">{p.name}</p>
+                        <p className="text-[11.5px] text-ink-400">
+                          {p.district}
+                        </p>
+                      </div>
                     </div>
-                    <span className="text-[11.5px] font-medium text-ink-500">
-                      %{p.progress}
+                  </td>
+                  <td className="px-3 py-3.5 text-ink-700">{p.contractor}</td>
+                  <td className="px-3 py-3.5">
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-[11.5px] font-medium ${stageStyles[p.stage]}`}
+                    >
+                      {p.stage}
                     </span>
-                  </div>
-                </td>
-                <td className="px-3 py-3.5">
-                  <DocBadge status={p.docStatus} />
-                </td>
-                <td className="px-5 py-3.5 text-[12.5px] text-ink-500">
-                  {p.updated}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-3 py-3.5">
+                    <div className="flex items-center gap-2">
+                      <div className="h-1.5 w-24 overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className={`h-full rounded-full ${p.progressColor}`}
+                          style={{ width: `${p.progress}%` }}
+                        />
+                      </div>
+                      <span className="text-[11.5px] font-medium text-ink-500">
+                        %{p.progress}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-3 py-3.5">
+                    <DocBadge status={p.docStatus} />
+                  </td>
+                  <td className="px-5 py-3.5 text-[12.5px] text-ink-500">
+                    {p.updated}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Users, ChevronRight, Trash2 } from "lucide-react";
+import { ChevronRight, Trash2 } from "lucide-react";
 import { type Contractor } from "@/lib/contractors";
+import ContractorLogo from "./ContractorLogo";
 
 export default function ContractorCard({
   contractor,
@@ -24,9 +25,7 @@ export default function ContractorCard({
 
       <Link href={`/muteahhitler/${contractor.id}`} className="flex flex-col">
         <div className="flex items-center gap-3.5">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-            <Users className="h-6 w-6" />
-          </div>
+          <ContractorLogo name={contractor.name} />
           <div className="min-w-0">
             <h3 className="truncate pr-6 text-[16px] font-bold tracking-tight text-ink-900">
               {contractor.name}

@@ -24,6 +24,7 @@ export interface Building {
   progress: number;
   ownersCount: number;
   startDate: string;
+  image: string;
   documents: BuildingDoc[];
 }
 
@@ -84,6 +85,32 @@ export function docsDone(b: Building): number {
   return b.documents.filter((d) => d.status !== "Yüklenmedi").length;
 }
 
+export function docsApproved(b: Building): number {
+  return b.documents.filter((d) => d.status === "Onaylandı").length;
+}
+
+/** Süreç ilerlemesini aşama + onaylı belge oranından hesaplar (0-100). */
+export function computeProgress(
+  status: BuildingStatus,
+  documents: BuildingDoc[],
+): number {
+  const stepRatio = (STATUS_STEP[status] - 1) / (PROCESS_STEPS.length - 1);
+  const approved = documents.filter((d) => d.status === "Onaylandı").length;
+  const docRatio = documents.length ? approved / documents.length : 0;
+  return Math.min(100, Math.round(stepRatio * 60 + docRatio * 40));
+}
+
+export function nextStatus(status: BuildingStatus): BuildingStatus {
+  const idx = ALL_STATUSES.indexOf(status);
+  return idx >= 0 && idx < ALL_STATUSES.length - 1
+    ? ALL_STATUSES[idx + 1]
+    : status;
+}
+
+export function isFinalStatus(status: BuildingStatus): boolean {
+  return status === ALL_STATUSES[ALL_STATUSES.length - 1];
+}
+
 const approved = (
   name: string,
   by = "Ahmet Yılmaz",
@@ -113,6 +140,7 @@ export function createBuilding(input: NewBuildingInput): Building {
     progress: 5,
     ownersCount: input.ownersCount,
     startDate: today,
+    image: `/buildings/building-${(Date.now() % 6) + 1}.jpg`,
     documents: DEFAULT_DOC_NAMES.map((n) => missing(n)),
   };
 }
@@ -121,6 +149,7 @@ export const seedBuildings: Building[] = [
   {
     id: "gunes-apartmani",
     name: "Güneş Apartmanı",
+    image: "/buildings/building-1.jpg",
     district: "Kadıköy",
     address: "Caferağa Mah. No: 12",
     status: "Belge Toplama",
@@ -144,6 +173,7 @@ export const seedBuildings: Building[] = [
   {
     id: "yildiz-sitesi-a-blok",
     name: "Yıldız Sitesi A Blok",
+    image: "/buildings/building-2.jpg",
     district: "Üsküdar",
     address: "Acıbadem Mah. No: 45",
     status: "Yıkım Onayı Bekleniyor",
@@ -156,6 +186,7 @@ export const seedBuildings: Building[] = [
   {
     id: "huzur-apartmani",
     name: "Huzur Apartmanı",
+    image: "/buildings/building-3.jpg",
     district: "Şişli",
     address: "Fulya Mah. No: 8",
     status: "İnşaat Aşaması",
@@ -175,6 +206,7 @@ export const seedBuildings: Building[] = [
   {
     id: "kardesler-apartmani",
     name: "Kardeşler Apartmanı",
+    image: "/buildings/building-4.jpg",
     district: "Beşiktaş",
     address: "Türkali Mah. No: 22",
     status: "Başvuru Yapıldı",
@@ -189,6 +221,7 @@ export const seedBuildings: Building[] = [
   {
     id: "bahar-sitesi",
     name: "Bahar Sitesi",
+    image: "/buildings/building-5.jpg",
     district: "Maltepe",
     address: "Bağlarbaşı Mah. No: 5",
     status: "Yıkım Onayı Bekleniyor",
@@ -205,6 +238,7 @@ export const seedBuildings: Building[] = [
   {
     id: "cinar-konutlari",
     name: "Çınar Konutları",
+    image: "/buildings/building-6.jpg",
     district: "Ataşehir",
     address: "Barbaros Mah. No: 17",
     status: "Teslim Edildi",

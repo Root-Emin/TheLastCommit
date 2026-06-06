@@ -1,7 +1,7 @@
 import {
   LayoutDashboard,
   Building2,
-  HardHat,
+  Users,
   FileText,
   CheckSquare,
   BarChart3,
@@ -17,22 +17,34 @@ import {
 export type StageStatus = "done" | "active" | "pending";
 export type DocStatus = "Tamam" | "Eksik Evrak";
 
+export type BadgeKey = "documents" | "approvals" | "notifications";
+
 export interface NavItem {
   label: string;
   icon: LucideIcon;
   href: string;
-  badge?: number;
+  badgeKey?: BadgeKey;
 }
 
 export const navItems: NavItem[] = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/" },
   { label: "Binalar", icon: Building2, href: "/binalar" },
-  { label: "Müteahhitler", icon: HardHat, href: "/muteahhitler" },
-  { label: "Belgeler", icon: FileText, href: "#" },
-  { label: "Onay Süreçleri", icon: CheckSquare, href: "#" },
-  { label: "Raporlar", icon: BarChart3, href: "#" },
-  { label: "Bildirimler", icon: Bell, href: "#", badge: 8 },
-  { label: "Ayarlar", icon: Settings, href: "#" },
+  { label: "Müteahhitler", icon: Users, href: "/muteahhitler" },
+  { label: "Belgeler", icon: FileText, href: "/belgeler", badgeKey: "documents" },
+  {
+    label: "Onay Süreçleri",
+    icon: CheckSquare,
+    href: "/onay-surecleri",
+    badgeKey: "approvals",
+  },
+  { label: "Raporlar", icon: BarChart3, href: "/raporlar" },
+  {
+    label: "Bildirimler",
+    icon: Bell,
+    href: "/bildirimler",
+    badgeKey: "notifications",
+  },
+  { label: "Ayarlar", icon: Settings, href: "/ayarlar" },
 ];
 
 export interface StatCard {
@@ -86,8 +98,18 @@ export type StageLabel =
   | "Yıkım"
   | "Yeniden Yapım";
 
+export const stageStyles: Record<StageLabel, string> = {
+  İnceleme: "bg-brand-50 text-brand-700",
+  "Belge Toplama": "bg-emerald-50 text-emerald-700",
+  Onay: "bg-violet-50 text-violet-700",
+  Yıkım: "bg-orange-50 text-orange-700",
+  "Yeniden Yapım": "bg-rose-50 text-rose-700",
+};
+
 export interface ProjectRow {
+  id: string;
   name: string;
+  image: string;
   district: string;
   contractor: string;
   stage: StageLabel;
@@ -95,12 +117,16 @@ export interface ProjectRow {
   progressColor: string;
   docStatus: DocStatus;
   updated: string;
-  selected?: boolean;
+  docTotal: number;
+  docDone: number;
+  missingDocs: string[];
 }
 
 export const projects: ProjectRow[] = [
   {
+    id: "yildiz-park-evleri",
     name: "Yıldız Park Evleri",
+    image: "/buildings/building-1.jpg",
     district: "Beşiktaş / İstanbul",
     contractor: "Mega Yapı A.Ş.",
     stage: "İnceleme",
@@ -108,10 +134,22 @@ export const projects: ProjectRow[] = [
     progressColor: "bg-brand-500",
     docStatus: "Eksik Evrak",
     updated: "21.05.2024",
-    selected: true,
+    docTotal: 22,
+    docDone: 15,
+    missingDocs: [
+      "Zemin Etüd Raporu",
+      "Ruhsat Projesi (Mimari)",
+      "Ruhsat Projesi (Statik)",
+      "Hak Sahipliği Belgesi",
+      "Emlak Beyan Formu",
+      "Asansör Projesi",
+      "Otopark Projesi",
+    ],
   },
   {
+    id: "gunesli-konutlari",
     name: "Güneşli Konutları",
+    image: "/buildings/building-2.jpg",
     district: "Bağcılar / İstanbul",
     contractor: "Demir İnşaat",
     stage: "Belge Toplama",
@@ -119,9 +157,14 @@ export const projects: ProjectRow[] = [
     progressColor: "bg-emerald-500",
     docStatus: "Tamam",
     updated: "20.05.2024",
+    docTotal: 18,
+    docDone: 18,
+    missingDocs: [],
   },
   {
+    id: "koru-sitesi",
     name: "Koru Sitesi",
+    image: "/buildings/building-3.jpg",
     district: "Üsküdar / İstanbul",
     contractor: "Yüksel Yapı",
     stage: "Onay",
@@ -129,9 +172,14 @@ export const projects: ProjectRow[] = [
     progressColor: "bg-violet-500",
     docStatus: "Eksik Evrak",
     updated: "19.05.2024",
+    docTotal: 22,
+    docDone: 19,
+    missingDocs: ["İskan Belgesi", "Asansör Projesi", "Otopark Projesi"],
   },
   {
+    id: "mavisehir-konaklari",
     name: "Mavişehir Konakları",
+    image: "/buildings/building-5.jpg",
     district: "Beylikdüzü / İstanbul",
     contractor: "Yıldırım İnşaat",
     stage: "Yıkım",
@@ -139,9 +187,14 @@ export const projects: ProjectRow[] = [
     progressColor: "bg-orange-500",
     docStatus: "Tamam",
     updated: "18.05.2024",
+    docTotal: 24,
+    docDone: 24,
+    missingDocs: [],
   },
   {
+    id: "doga-rezidans",
     name: "Doğa Rezidans",
+    image: "/buildings/building-6.jpg",
     district: "Kadıköy / İstanbul",
     contractor: "Doğa Yapı A.Ş.",
     stage: "Yeniden Yapım",
@@ -149,6 +202,18 @@ export const projects: ProjectRow[] = [
     progressColor: "bg-rose-500",
     docStatus: "Eksik Evrak",
     updated: "17.05.2024",
+    docTotal: 20,
+    docDone: 12,
+    missingDocs: [
+      "Zemin Etüd Raporu",
+      "Ruhsat Projesi (Mimari)",
+      "Ruhsat Projesi (Statik)",
+      "Hak Sahipliği Belgesi",
+      "Yapı Denetim Sözleşmesi",
+      "Asansör Projesi",
+      "Otopark Projesi",
+      "Peyzaj Projesi",
+    ],
   },
 ];
 
@@ -157,21 +222,62 @@ export interface TimelineStage {
   status: StageStatus;
   date?: string;
   hint: string;
+  description: string;
 }
 
 export const timelineStages: TimelineStage[] = [
-  { label: "Başvuru", status: "done", date: "01.03.2024", hint: "Tamamlandı" },
+  {
+    label: "Başvuru",
+    status: "done",
+    date: "01.03.2024",
+    hint: "Tamamlandı",
+    description:
+      "Hak sahipleri kentsel dönüşüm için belediyeye resmi başvurusunu tamamlar.",
+  },
   {
     label: "Belge Toplama",
     status: "done",
     date: "05.04.2024",
     hint: "Tamamlandı",
+    description:
+      "Tapu, kimlik, deprem risk raporu ve muvafakatname gibi evraklar toplanır.",
   },
-  { label: "İnceleme", status: "active", date: "Devam Ediyor", hint: "Aktif" },
-  { label: "Onay", status: "pending", hint: "Beklemede" },
-  { label: "Yıkım", status: "pending", hint: "Beklemede" },
-  { label: "Yeniden Yapım", status: "pending", hint: "Beklemede" },
-  { label: "Teslim", status: "pending", hint: "Beklemede" },
+  {
+    label: "İnceleme",
+    status: "active",
+    date: "Devam Ediyor",
+    hint: "Aktif",
+    description:
+      "Belediye teknik ekibi başvuruyu değerlendirir ve binayı yerinde inceler.",
+  },
+  {
+    label: "Onay",
+    status: "pending",
+    hint: "Beklemede",
+    description:
+      "Dönüşüm kararı ve yıkım ruhsatı yetkili makamlarca onaylanır.",
+  },
+  {
+    label: "Yıkım",
+    status: "pending",
+    hint: "Beklemede",
+    description:
+      "Riskli yapı, güvenlik tedbirleri alınarak kontrollü şekilde yıkılır.",
+  },
+  {
+    label: "Yeniden Yapım",
+    status: "pending",
+    hint: "Beklemede",
+    description:
+      "Deprem yönetmeliğine uygun, modern ve dayanıklı yeni bina inşa edilir.",
+  },
+  {
+    label: "Teslim",
+    status: "pending",
+    hint: "Beklemede",
+    description:
+      "Tamamlanan bağımsız bölümler hak sahiplerine teslim edilir.",
+  },
 ];
 
 export interface DonutSegment {
@@ -192,13 +298,3 @@ export const donutSegments: DonutSegment[] = [
 ];
 
 export const donutTotal = donutSegments.reduce((s, d) => s + d.value, 0);
-
-export const missingDocs: string[] = [
-  "Zemin Etüd Raporu",
-  "Ruhsat Projesi (Mimari)",
-  "Ruhsat Projesi (Statik)",
-  "Hak Sahipliği Belgesi",
-  "Emlak Beyan Formu",
-  "Asansör Projesi",
-  "Otopark Projesi",
-];

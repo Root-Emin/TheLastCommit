@@ -4,27 +4,32 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Pencil,
-  MoreVertical,
+  ArrowRight,
   Upload,
   Users,
   Calendar,
-  HardHat,
   Building2,
   MapPin,
 } from "lucide-react";
 import { useBuildings } from "@/components/BuildingsProvider";
-import { STATUS_STEP, docsDone } from "@/lib/buildings";
+import { STATUS_STEP, docsDone, isFinalStatus, nextStatus } from "@/lib/buildings";
 import ProcessStepper from "@/components/binalar/ProcessStepper";
 import DocumentList from "@/components/binalar/DocumentList";
 import StatusBadge from "@/components/binalar/StatusBadge";
+import ContractorLogo from "@/components/muteahhitler/ContractorLogo";
 
 export default function BuildingDetailPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const { getBuilding, assignContractor, markDocumentUploaded } = useBuildings();
+  const {
+    getBuilding,
+    assignContractor,
+    markDocumentUploaded,
+    approveDocument,
+    advanceStatus,
+  } = useBuildings();
   const building = getBuilding(params.id);
 
   const [assigning, setAssigning] = useState(false);
@@ -91,22 +96,17 @@ export default function BuildingDetailPage({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-[13px] font-medium text-ink-700 transition-colors hover:bg-slate-50"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-              Düzenle
-            </button>
-            <button
-              type="button"
-              aria-label="Daha fazla"
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-ink-500 transition-colors hover:bg-slate-50"
-            >
-              <MoreVertical className="h-4 w-4" />
-            </button>
-          </div>
+          <button
+            type="button"
+            disabled={isFinalStatus(building.status)}
+            onClick={() => advanceStatus(building.id)}
+            className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2.5 text-[13px] font-semibold text-white shadow-soft transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isFinalStatus(building.status)
+              ? "Süreç Tamamlandı"
+              : "Sonraki Aşamaya Geç"}
+            {!isFinalStatus(building.status) && <ArrowRight className="h-4 w-4" />}
+          </button>
         </div>
 
         {/* Body grid */}
@@ -115,12 +115,31 @@ export default function BuildingDetailPage({
           <div className="space-y-5 lg:col-span-2">
             {/* Process */}
             <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
-              <h2 className="text-[15px] font-semibold text-ink-900">
-                Süreç İlerlemesi
-              </h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-[15px] font-semibold text-ink-900">
+                  Süreç İlerlemesi
+                </h2>
+                <span className="text-[13px] font-semibold text-indigo-600">
+                  %{building.progress}
+                </span>
+              </div>
+              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                <div
+                  className="h-full rounded-full bg-indigo-500 transition-all"
+                  style={{ width: `${building.progress}%` }}
+                />
+              </div>
               <div className="mt-6">
                 <ProcessStepper current={STATUS_STEP[building.status]} />
               </div>
+              {!isFinalStatus(building.status) && (
+                <p className="mt-5 text-[12.5px] text-ink-400">
+                  Sıradaki aşama:{" "}
+                  <span className="font-medium text-ink-700">
+                    {nextStatus(building.status)}
+                  </span>
+                </p>
+              )}
             </section>
 
             {/* Documents */}
@@ -154,6 +173,7 @@ export default function BuildingDetailPage({
                   onUpload={(docName) =>
                     markDocumentUploaded(building.id, docName)
                   }
+                  onApprove={(docName) => approveDocument(building.id, docName)}
                 />
               </div>
             </section>
@@ -163,9 +183,12 @@ export default function BuildingDetailPage({
           <div className="space-y-5">
             {/* Image */}
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card">
-              <div className="flex h-44 items-center justify-center bg-gradient-to-br from-indigo-100 via-slate-100 to-slate-200">
-                <Building2 className="h-14 w-14 text-slate-300" />
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={building.image}
+                alt={building.name}
+                className="h-44 w-full object-cover"
+              />
             </div>
 
             {/* Bina Bilgileri */}
@@ -198,15 +221,16 @@ export default function BuildingDetailPage({
             {/* Müteahhit Bilgisi */}
             <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
               <h2 className="flex items-center gap-2 text-[15px] font-semibold text-ink-900">
-                <HardHat className="h-[18px] w-[18px] text-indigo-500" />
+                <Users className="h-[18px] w-[18px] text-indigo-500" />
                 Müteahhit Bilgisi
               </h2>
               <div className="mt-3 border-t border-slate-100 pt-4">
                 {building.contractor ? (
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                      <HardHat className="h-5 w-5" />
-                    </div>
+                    <ContractorLogo
+                      name={building.contractor}
+                      className="h-10 w-10 text-[13px]"
+                    />
                     <div>
                       <p className="text-[14px] font-semibold text-ink-900">
                         {building.contractor}

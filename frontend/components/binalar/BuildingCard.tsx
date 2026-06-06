@@ -1,11 +1,5 @@
 import Link from "next/link";
-import {
-  MapPin,
-  HardHat,
-  Building2,
-  CheckCircle2,
-  FileWarning,
-} from "lucide-react";
+import { MapPin, HardHat, CheckCircle2, FileWarning } from "lucide-react";
 import { type Building, docsDone } from "@/lib/buildings";
 import StatusBadge from "./StatusBadge";
 
@@ -20,8 +14,14 @@ export default function BuildingCard({ building }: { building: Building }) {
       className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card transition-all hover:-translate-y-0.5 hover:shadow-soft"
     >
       {/* Image header */}
-      <div className="relative flex h-40 items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-        <Building2 className="h-12 w-12 text-slate-300" />
+      <div className="relative h-40 overflow-hidden bg-slate-100">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={building.image}
+          alt={building.name}
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" />
         <StatusBadge status={building.status} className="absolute right-3 top-3" />
       </div>
 

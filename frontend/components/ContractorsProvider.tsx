@@ -21,6 +21,7 @@ interface ContractorsContextValue {
   getContractor: (id: string) => Contractor | undefined;
   addContractor: (input: NewContractorInput) => Contractor;
   deleteContractor: (id: string) => void;
+  resetContractors: () => void;
 }
 
 const ContractorsContext = createContext<ContractorsContextValue | null>(null);
@@ -64,9 +65,19 @@ export function ContractorsProvider({
     setContractors((prev) => prev.filter((c) => c.id !== id));
   }, []);
 
+  const resetContractors = useCallback(() => {
+    setContractors(seedContractors);
+  }, []);
+
   return (
     <ContractorsContext.Provider
-      value={{ contractors, getContractor, addContractor, deleteContractor }}
+      value={{
+        contractors,
+        getContractor,
+        addContractor,
+        deleteContractor,
+        resetContractors,
+      }}
     >
       {children}
     </ContractorsContext.Provider>
